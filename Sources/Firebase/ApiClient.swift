@@ -72,6 +72,9 @@ class ApiClient {
             $0.body = ByteBuffer(string: try URLEncodedFormEncoder().encode(TokenFormRequest(grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion: jwt)))
         }).get()
         
-        return try oauthResponse.content.decode(OAuthTokenResponse.self)
+        guard let parsed = try? oauthResponse.content.decode(OAuthTokenResponse.self) else {
+            throw FirebaseError(code: nil, message: "Could not get OAuth token")
+        }
+        return parsed
     }
 }
