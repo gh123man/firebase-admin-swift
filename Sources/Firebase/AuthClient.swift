@@ -27,9 +27,31 @@ public class AuthClient {
             throw Abort(.internalServerError, reason: "Config required")
         }
         
+        let result: FirebaseJWTPayload
+        do {
+            result = try await verify(idToken: idToken)
+        } catch {
+            // It's possible google has rotated the JWT keys, so if we get any kind of failure - let's try one more time without the cache.
+            result = try await verify(idToken: idToken, forceRefresh: true)
+        }
+        
+        guard result.audience.value.first == config.project_id else {
+            throw JWTError.generic(identifier: "aud", reason: "Audience must be equal to the firebase project id.")
+        }
+        
+        guard let url = URL(string: result.issuer.value),
+              let expectedUrl = URL(string: "https://securetoken.google.com/\(config.project_id)"),
+                url == expectedUrl else {
+            throw JWTError.generic(identifier: "iss", reason: "Claim must be issued by google and contain the project id")
+        }
+        
+        return result
+    }
+    
+    private func verify(idToken: String, forceRefresh: Bool = false) async throws -> FirebaseJWTPayload {
         var jwks: JWKS? = try await app.cache.get(jwtCacheKey)
         
-        if jwks == nil {
+        if jwks == nil || forceRefresh {
             let googleCert = try await app.client.get("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com").get()
             jwks = try googleCert.content.decode(JWKS.self)
             if let jwks = jwks {
@@ -44,19 +66,7 @@ public class AuthClient {
         let signers = JWTSigners()
         try signers.use(jwks: jwks)
         
-        let result = try signers.verify(idToken, as: FirebaseJWTPayload.self)
-        
-        guard result.audience.value.first == config.project_id else {
-            throw JWTError.generic(identifier: "aud", reason: "Audience must be equal to the firebase project id.")
-        }
-        
-        guard let url = URL(string: result.issuer.value),
-              let expectedUrl = URL(string: "https://securetoken.google.com/\(config.project_id)"),
-                url == expectedUrl else {
-            throw JWTError.generic(identifier: "iss", reason: "Claim must be issued by google and contain the project id")
-        }
-        
-        return result
+        return try signers.verify(idToken, as: FirebaseJWTPayload.self)
     }
     
     public func getUser(uid: String) async throws -> FirebaseUser {
