@@ -1,6 +1,6 @@
 # Unofficial Firebase admin SDK for Swift
 
-This repo implements the (some of) firebase API in swift for use in [Vapor](https://vapor.codes/) projects. This library uses the `serviceAccountKey.json` like the official libraries. Fetches the firebase admin OAuth token, validates user ID tokens, and more. 
+This repo implements (some of) the firebase API in swift for use in [Vapor](https://vapor.codes/) projects. This library uses the `serviceAccountKey.json` like the official libraries. Fetches the firebase admin OAuth token, validates user ID tokens, and more. 
 
 ## Usage
 
