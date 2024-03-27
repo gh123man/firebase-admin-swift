@@ -20,7 +20,7 @@ public class MessagingClient {
     }
     
     // Possible errors: https://firebase.google.cn/docs/reference/fcm/rest/v1/ErrorCode
-    public func send(_ message: Message, dryRun: Bool = false) async throws {
+    public func send(_ message: FcmMessage, dryRun: Bool = false) async throws {
         let response = try await api.makeAuthenticatedPost(
             endpoint: try api.config.messagingEndpoint(),
             body: FcmRequest(validateOnly: dryRun, message: message))
@@ -29,5 +29,6 @@ public class MessagingClient {
             return
         }
         try api.throwIfError(response: response)
+        throw Abort(.internalServerError, reason: "Could not parse error response")
     }
 }

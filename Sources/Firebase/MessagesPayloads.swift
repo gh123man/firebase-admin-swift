@@ -25,7 +25,7 @@ public struct FcmNotification: Codable {
           case imageURL = "image"
       }
 
-      init(
+      public init(
           title: String? = nil,
           body: String? = nil,
           imageURL: String? = nil
@@ -66,7 +66,7 @@ public struct AndroidConfig: Codable {
         //        case fcmOptions = "fcm_options"
     }
     
-    init(
+    public init(
         collapseKey: String? = nil,
         priority: String? = nil,
         restrictedPackageName: String? = nil,
@@ -135,7 +135,7 @@ struct WebpushFCMOptions: Codable {
         case link
     }
 
-    init(link: String? = nil) {
+    public init(link: String? = nil) {
         self.link = link
     }
 }
@@ -154,7 +154,7 @@ public struct FCMOptions: Codable {
         case analyticsLabel = "analytics_label"
     }
 
-    init(analyticsLabel: String? = nil) {
+    public init(analyticsLabel: String? = nil) {
         self.analyticsLabel = analyticsLabel
     }
 }
@@ -186,7 +186,7 @@ public struct FCMOptions: Codable {
 //        case fcmOptions = "fcm_options"
 //    }
 //
-//    init(
+//    public init(
 //        headers: [String: String]? = nil,
 //        payload: APNSPayload? = nil,
 //        fcmOptions: APNSFCMOptions? = nil
@@ -210,7 +210,7 @@ public struct FCMOptions: Codable {
      Condition    string            `json:"condition,omitempty"`
  }
  */
-public struct Message: Codable {
+public struct FcmMessage: Codable {
     public let data: [String: String]?
     public let notification: FcmNotification?
     public let android: AndroidConfig?
@@ -233,7 +233,7 @@ public struct Message: Codable {
         case condition
     }
 
-    init(
+    public init(
         data: [String: String]? = nil,
         notification: FcmNotification? = nil,
         android: AndroidConfig? = nil,
@@ -269,9 +269,9 @@ public struct SendResponse: Codable {
 }
 
 
-public struct FcmRequest: Codable {
+struct FcmRequest: Codable {
     public var validateOnly: Bool
-    public var message: Message
+    public var message: FcmMessage
 
     private enum CodingKeys: String, CodingKey {
         case validateOnly = "validateOnly"

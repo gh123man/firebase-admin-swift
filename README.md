@@ -44,6 +44,11 @@ let user = try await app.firebase.auth.getUser(uid: "abcdefg1234567")
 // Delete a single user
 try await app.firebase.auth.deleteUser(uid: "abcdefg1234567")
 
+// Send an FCM message
+try await app.firebase.messaging.send(FcmMessage(
+    notification: FcmNotification(title: "foo", body: "bar"),
+    token: "MY_TOKEN"))
+
 ```
 
 Also works on `req.firebase`
