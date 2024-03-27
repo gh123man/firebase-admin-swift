@@ -18,13 +18,17 @@ class ApiClient {
         self.app = app
     }
     
+    func throwIfError(response: ClientResponse) throws {
+        if let error = try? response.content.decode(FirebaseErrorResponse.self) {
+            throw error
+        }
+    }
+    
     func decodeOrThrow<T: Codable>(response: ClientResponse) throws -> T {
         if let decoded = try? response.content.decode(T.self) {
             return decoded
         }
-        if let error = try? response.content.decode(FirebaseError.self) {
-            throw error
-        }
+        try throwIfError(response: response)
         throw Abort(.internalServerError, reason: "Could not parse response")
     }
     
@@ -73,7 +77,7 @@ class ApiClient {
         }).get()
         
         guard let parsed = try? oauthResponse.content.decode(OAuthTokenResponse.self) else {
-            throw FirebaseError(code: nil, message: "Could not get OAuth token")
+            throw Abort(.internalServerError, reason: "Could not get OAuth token")
         }
         return parsed
     }

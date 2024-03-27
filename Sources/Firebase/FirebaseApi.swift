@@ -16,17 +16,18 @@ public class FirebaseApi {
     private let api: ApiClient
     
     public let auth: AuthClient
+    public let messaging: MessagingClient
     
     public init(app: Application) {
         self.app = app
         self.api = ApiClient(app: app)
         self.auth = AuthClient(app: app, api: api)
+        self.messaging = MessagingClient(app: app, api: api)
     }
     
     public func loadConfig(from json: String) throws {
         config = try json.jsonDecoded()
         api.config = config
-        auth.config = config
     }
     
 }

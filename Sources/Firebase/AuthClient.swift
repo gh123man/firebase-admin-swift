@@ -14,7 +14,6 @@ public class AuthClient {
     
     let app: Application
     let api: ApiClient
-    var config: Config?
     
     
     init(app: Application, api: ApiClient) {
@@ -23,7 +22,7 @@ public class AuthClient {
     }
     
     public func validate(idToken: String) async throws -> FirebaseJWTPayload {
-        guard let config = config else {
+        guard let config = api.config else {
             throw Abort(.internalServerError, reason: "Config required")
         }
         
@@ -71,18 +70,18 @@ public class AuthClient {
     
     public func getUser(uid: String) async throws -> FirebaseUser {
         let response = try await api.makeAuthenticatedPost(
-            endpoint: try config.authEndpoint(.lookup),
+            endpoint: try api.config.authEndpoint(.lookup),
             body: UserRequest(localId: uid))
         
         let userResponse: LookupResponse = try api.decodeOrThrow(response: response)
         guard let user = userResponse.users?.first else {
-            throw FirebaseError(code: nil, message: "NOT_FOUND") // TODO: Improve this?
+            throw Abort(.internalServerError, reason: "User not found")
         }
         return user
     }
     
     public func getUsers() async throws -> [UserRecord] {
-        let response = try await api.makeAuthenticatedPost(endpoint: try config.authEndpoint(.query))
+        let response = try await api.makeAuthenticatedPost(endpoint: try api.config.authEndpoint(.query))
         
         let usersResponse: UserList = try api.decodeOrThrow(response: response)
         return usersResponse.userInfo
@@ -90,16 +89,14 @@ public class AuthClient {
     
     public func deleteUser(uid: String) async throws {
         let response = try await api.makeAuthenticatedPost(
-            endpoint: try config.authEndpoint(.delete),
+            endpoint: try api.config.authEndpoint(.delete),
             body: UserRequest(localId: uid))
         
         if response.status == .ok {
             return
         }
         
-        if let error = try? response.content.decode(FirebaseErrorResponse.self) {
-            throw error.error
-        }
+        try api.throwIfError(response: response)
         throw Abort(.internalServerError, reason: "Could not parse response")
     }
 }

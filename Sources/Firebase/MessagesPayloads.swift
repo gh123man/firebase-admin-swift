@@ -14,10 +14,10 @@ import Foundation
      ImageURL string `json:"image,omitempty"`
  }
  */
-  struct FcmNotification: Codable {
-      let title: String?
-      let body: String?
-      let imageURL: String?
+public struct FcmNotification: Codable {
+      public let title: String?
+      public let body: String?
+      public let imageURL: String?
 
       enum CodingKeys: String, CodingKey {
           case title
@@ -48,14 +48,14 @@ import Foundation
      FCMOptions            *AndroidFCMOptions   `json:"fcm_options,omitempty"`
  }
  */
-struct AndroidConfig: Codable {
-    let collapseKey: String?
-    let priority: String?
-    //    let ttl: Double?
-    let restrictedPackageName: String?
-    let data: [String: String]?
-    let notification: AndroidNotification?
-    //    let fcmOptions: AndroidFCMOptions?
+public struct AndroidConfig: Codable {
+    public let collapseKey: String?
+    public let priority: String?
+    //    public let ttl: Double?
+    public let restrictedPackageName: String?
+    public let data: [String: String]?
+    public let notification: AndroidNotification?
+    //    public let fcmOptions: AndroidFCMOptions?
     
     enum CodingKeys: String, CodingKey {
         case collapseKey = "collapse_key"
@@ -113,8 +113,12 @@ struct AndroidConfig: Codable {
  }
 */
 
-struct AndroidNotification: Codable {
-    var ClickAction: String
+public struct AndroidNotification: Codable {
+    public var ClickAction: String
+    
+    enum CodingKeys: String, CodingKey {
+        case ClickAction = "click_action"
+    }
     
 }
  
@@ -125,7 +129,7 @@ struct AndroidNotification: Codable {
  */
 
 struct WebpushFCMOptions: Codable {
-    let link: String?
+    public let link: String?
 
     enum CodingKeys: String, CodingKey {
         case link
@@ -143,8 +147,8 @@ struct WebpushFCMOptions: Codable {
      AnalyticsLabel string `json:"analytics_label,omitempty"`
  }
  */
-struct FCMOptions: Codable {
-    let analyticsLabel: String?
+public struct FCMOptions: Codable {
+    public let analyticsLabel: String?
 
     enum CodingKeys: String, CodingKey {
         case analyticsLabel = "analytics_label"
@@ -172,9 +176,9 @@ struct FCMOptions: Codable {
  }
  */
 //struct APNSConfig: Codable {
-//    let headers: [String: String]?
-//    let payload: APNSPayload?
-//    let fcmOptions: APNSFCMOptions?
+//    public let headers: [String: String]?
+//    public let payload: APNSPayload?
+//    public let fcmOptions: APNSFCMOptions?
 //
 //    enum CodingKeys: String, CodingKey {
 //        case headers
@@ -206,16 +210,16 @@ struct FCMOptions: Codable {
      Condition    string            `json:"condition,omitempty"`
  }
  */
-struct Message: Codable {
-    let data: [String: String]?
-    let notification: FcmNotification?
-    let android: AndroidConfig?
-//    let webpush: WebpushConfig?
-//    let apns: APNSConfig?
-    let fcmOptions: FCMOptions?
-    let token: String?
-    let topic: String?
-    let condition: String?
+public struct Message: Codable {
+    public let data: [String: String]?
+    public let notification: FcmNotification?
+    public let android: AndroidConfig?
+//    public let webpush: WebpushConfig?
+//    public let apns: APNSConfig?
+    public let fcmOptions: FCMOptions?
+    public let token: String?
+    public let topic: String?
+    public let condition: String?
 
     enum CodingKeys: String, CodingKey {
         case data
@@ -251,3 +255,32 @@ struct Message: Codable {
         self.condition = condition
     }
 }
+
+public struct SendResponse: Codable {
+    public var success: Bool
+    public var messageID: String
+    public var error: String? // Assuming error is represented by its message. Adjust if needed.
+
+    private enum CodingKeys: String, CodingKey {
+        case success
+        case messageID = "messageID"
+        case error
+    }
+}
+
+
+public struct FcmRequest: Codable {
+    public var validateOnly: Bool
+    public var message: Message
+
+    private enum CodingKeys: String, CodingKey {
+        case validateOnly = "validateOnly"
+        case message = "message"
+    }
+}
+
+//
+//type fcmRequest struct {
+//    ValidateOnly bool     `json:"validate_only,omitempty"`
+//    Message      *Message `json:"message,omitempty"`
+//}
