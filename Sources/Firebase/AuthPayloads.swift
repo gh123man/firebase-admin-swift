@@ -10,12 +10,12 @@ import AnyCodable
 import JWT
 
 public struct FirebaseError: Codable {
-    let code: Int?
-    let message: String?
+    public let code: Int?
+    public let message: String?
 }
 
 public struct FirebaseErrorResponse: Codable, Error {
-    let error: FirebaseError
+    public let error: FirebaseError
 }
 
 public struct UserList: Codable {
