@@ -114,12 +114,15 @@ public struct AndroidConfig: Codable {
 */
 
 public struct AndroidNotification: Codable {
-    public var ClickAction: String
+    public var clickAction: String
     
     enum CodingKeys: String, CodingKey {
-        case ClickAction = "click_action"
+        case clickAction = "click_action"
     }
     
+    public init(clickAction : String) {
+        self.clickAction = clickAction
+    }
 }
  
  /*
