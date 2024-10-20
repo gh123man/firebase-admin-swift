@@ -80,14 +80,14 @@ public class AuthClient {
         return user
     }
     
-    public func getUsers() async throws -> [UserRecord] {
+    public func getUsers() async throws -> [FirebaseUser] {
         let response = try await api.makeAuthenticatedPost(endpoint: try api.config.authEndpoint(.query))
         
         let usersResponse: UserList = try api.decodeOrThrow(response: response)
         return usersResponse.userInfo
     }
     
-    public func updateUser(user: UserRecord) async throws {
+    public func updateUser(user: FirebaseUser) async throws {
         let response = try await api.makeAuthenticatedPost(
             endpoint: try api.config.authEndpoint(.update),
             body: user)

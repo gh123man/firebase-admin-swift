@@ -19,25 +19,8 @@ public struct FirebaseErrorResponse: Codable, Error {
 }
 
 public struct UserList: Codable {
-    public let userInfo: [UserRecord]
+    public let userInfo: [FirebaseUser]
 }
-
-public struct UserRecord: Codable {
-    public let localID: String
-    public var email, displayName: String?
-    public let photoURL: String?
-    public let emailVerified: Bool?
-    public let providerUserInfo: [ProviderUserInfo]?
-    public let validSince, lastLoginAt, createdAt, lastRefreshAt: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case localID = "localId"
-        case email, displayName
-        case photoURL = "photoUrl"
-        case emailVerified, providerUserInfo, validSince, lastLoginAt, createdAt, lastRefreshAt
-    }
-}
-
 
 // TODO: This could probably be filled out more.
 public struct FirebaseContext: Codable {
@@ -120,10 +103,10 @@ public struct LookupResponse: Codable {
 
 public struct FirebaseUser: Codable {
     public let localId: String
-    public let email: String?
+    public var email: String?
     public let emailVerified: Bool?
     public let phoneNumber: String?
-    public let displayName: String?
+    public var displayName: String?
     public let photoUrl: String?
     public let providerUserInfo: [ProviderUserInfo]?
     public let passwordHash: String?
