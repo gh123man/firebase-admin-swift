@@ -24,7 +24,7 @@ public struct UserList: Codable {
 
 public struct UserRecord: Codable {
     public let localID: String
-    public let email, displayName: String?
+    public var email, displayName: String?
     public let photoURL: String?
     public let emailVerified: Bool?
     public let providerUserInfo: [ProviderUserInfo]?

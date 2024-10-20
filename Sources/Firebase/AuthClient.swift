@@ -87,6 +87,19 @@ public class AuthClient {
         return usersResponse.userInfo
     }
     
+    public func updateUser(user: UserRecord) async throws {
+        let response = try await api.makeAuthenticatedPost(
+            endpoint: try api.config.authEndpoint(.update),
+            body: user)
+        
+        if response.status == .ok {
+            return
+        }
+        
+        try api.throwIfError(response: response)
+        throw Abort(.internalServerError, reason: "Could not parse response")
+    }
+    
     public func deleteUser(uid: String) async throws {
         let response = try await api.makeAuthenticatedPost(
             endpoint: try api.config.authEndpoint(.delete),

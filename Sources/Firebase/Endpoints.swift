@@ -13,6 +13,7 @@ enum AuthEndpoint: String {
     case query = "accounts:query"
     case delete = "accounts:delete"
     case lookup = "accounts:lookup"
+    case update = "accounts:update"
 }
 
 extension Config {
