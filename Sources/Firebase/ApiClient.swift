@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import JWT
+import JWTKit
 
 actor ApiClient: Sendable {
     

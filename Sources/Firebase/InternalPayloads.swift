@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import JWT
+import JWTKit
 
 struct OAuthTokenResponse: Codable {
     static let cacheKey = "OauthTokenResponse"
