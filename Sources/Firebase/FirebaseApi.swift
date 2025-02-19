@@ -9,7 +9,7 @@ import Foundation
 import Vapor
 import JWT
 
-public class FirebaseApi {
+public actor FirebaseApi: Sendable {
     
     private let app: Application
     private var config: Config?
@@ -25,9 +25,9 @@ public class FirebaseApi {
         self.messaging = MessagingClient(app: app, api: api)
     }
     
-    public func loadConfig(from json: String) throws {
+    public func loadConfig(from json: String) async throws {
         config = try json.jsonDecoded()
-        api.config = config
+        await api.setConfig(config)
     }
     
 }
