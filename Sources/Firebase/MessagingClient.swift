@@ -28,7 +28,7 @@ public class MessagingClient {
         if response.status == .ok {
             return
         }
-        try api.throwIfError(response: response)
+        try await api.throwIfError(response: response)
         throw Abort(.internalServerError, reason: "Could not parse error response")
     }
 }

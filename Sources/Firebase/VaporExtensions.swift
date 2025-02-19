@@ -16,7 +16,7 @@ extension Request {
 }
 
 extension Application {
-    private struct Key: StorageKey {
+    private struct Key: StorageKey, Sendable {
         typealias Value = FirebaseApi
     }
     

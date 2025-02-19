@@ -7,9 +7,9 @@
 
 import Foundation
 import Vapor
-import JWT
+import JWTKit
 
-public class AuthClient {
+public actor AuthClient: Sendable {
     private let jwtCacheKey = "FirebaseTokenValidator_firebase_jwks_keys"
     
     let app: Application
@@ -22,7 +22,7 @@ public class AuthClient {
     }
     
     public func validate(idToken: String) async throws -> FirebaseJWTPayload {
-        guard let config = api.config else {
+        guard let config = await api.config else {
             throw Abort(.internalServerError, reason: "Config required")
         }
         
@@ -62,10 +62,10 @@ public class AuthClient {
             throw Abort(.internalServerError, reason: "Failed to resovle Firebase JWKS keys")
         }
         
-        let signers = JWTSigners()
-        try signers.use(jwks: jwks)
+        let signers = JWTKeyCollection()
+        try await signers.add(jwks: jwks)
         
-        return try signers.verify(idToken, as: FirebaseJWTPayload.self)
+        return try await signers.verify(idToken, as: FirebaseJWTPayload.self)
     }
     
     public func getUser(uid: String) async throws -> FirebaseUser {
@@ -73,7 +73,7 @@ public class AuthClient {
             endpoint: try api.config.authEndpoint(.lookup),
             body: UserRequest(localId: uid))
         
-        let userResponse: LookupResponse = try api.decodeOrThrow(response: response)
+        let userResponse: LookupResponse = try await api.decodeOrThrow(response: response)
         guard let user = userResponse.users?.first else {
             throw Abort(.internalServerError, reason: "User not found")
         }
@@ -83,7 +83,7 @@ public class AuthClient {
     public func getUsers() async throws -> [FirebaseUser] {
         let response = try await api.makeAuthenticatedPost(endpoint: try api.config.authEndpoint(.query))
         
-        let usersResponse: UserList = try api.decodeOrThrow(response: response)
+        let usersResponse: UserList = try await api.decodeOrThrow(response: response)
         return usersResponse.userInfo
     }
     
@@ -96,7 +96,7 @@ public class AuthClient {
             return
         }
         
-        try api.throwIfError(response: response)
+        try await api.throwIfError(response: response)
         throw Abort(.internalServerError, reason: "Could not parse response")
     }
     
@@ -109,7 +109,7 @@ public class AuthClient {
             return
         }
         
-        try api.throwIfError(response: response)
+        try await api.throwIfError(response: response)
         throw Abort(.internalServerError, reason: "Could not parse response")
     }
 }

@@ -14,7 +14,7 @@ import Foundation
      ImageURL string `json:"image,omitempty"`
  }
  */
-public struct FcmNotification: Codable {
+public struct FcmNotification: Codable, Sendable {
       public let title: String?
       public let body: String?
       public let imageURL: String?
@@ -48,7 +48,7 @@ public struct FcmNotification: Codable {
      FCMOptions            *AndroidFCMOptions   `json:"fcm_options,omitempty"`
  }
  */
-public struct AndroidConfig: Codable {
+public struct AndroidConfig: Codable, Sendable {
     public let collapseKey: String?
     public let priority: String?
     //    public let ttl: Double?
@@ -113,7 +113,7 @@ public struct AndroidConfig: Codable {
  }
 */
 
-public struct AndroidNotification: Codable {
+public struct AndroidNotification: Codable, Sendable {
     public var clickAction: String
     
     enum CodingKeys: String, CodingKey {
@@ -150,7 +150,7 @@ struct WebpushFCMOptions: Codable {
      AnalyticsLabel string `json:"analytics_label,omitempty"`
  }
  */
-public struct FCMOptions: Codable {
+public struct FCMOptions: Codable, Sendable {
     public let analyticsLabel: String?
 
     enum CodingKeys: String, CodingKey {
@@ -213,7 +213,7 @@ public struct FCMOptions: Codable {
      Condition    string            `json:"condition,omitempty"`
  }
  */
-public struct FcmMessage: Codable {
+public struct FcmMessage: Codable, Sendable {
     public let data: [String: String]?
     public let notification: FcmNotification?
     public let android: AndroidConfig?

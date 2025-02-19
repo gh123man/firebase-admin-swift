@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import JWT
+import JWTKit
 
 struct OAuthTokenResponse: Codable {
     static let cacheKey = "OauthTokenResponse"
@@ -22,6 +22,7 @@ struct TokenFormRequest: Codable {
 }
 
 struct FirebaseAdminAuthPayload: JWTPayload {
+    
     enum CodingKeys: String, CodingKey {
         case expiration = "exp"
         case audience = "aud"
@@ -38,7 +39,7 @@ struct FirebaseAdminAuthPayload: JWTPayload {
     var audience: AudienceClaim
     var expiration: ExpirationClaim = .init(value: Date().addingTimeInterval(.seconds(1000)))
     
-    func verify(using signer: JWTSigner) throws {
+    func verify(using algorithm: some JWTKit.JWTAlgorithm) async throws {
         try self.expiration.verifyNotExpired()
     }
 }

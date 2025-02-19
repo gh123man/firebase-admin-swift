@@ -7,15 +7,19 @@
 
 import Foundation
 import Vapor
-import JWT
+import JWTKit
 
-class ApiClient {
+actor ApiClient: Sendable {
     
     let app: Application
     var config: Config?
     
     init(app: Application) {
         self.app = app
+    }
+    
+    func setConfig(_ config: Config?) async {
+        self.config = config
     }
     
     func throwIfError(response: ClientResponse) throws {
@@ -60,11 +64,12 @@ class ApiClient {
         
         let scopes = "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/devstorage.full_control https://www.googleapis.com/auth/firebase https://www.googleapis.com/auth/identitytoolkit https://www.googleapis.com/auth/userinfo.email"
         
-        let privateKey = try RSAKey.private(pem: config.private_key)
-        let signers = JWTSigners()
-        signers.use(.rs256(key: privateKey), kid: JWKIdentifier(string: config.private_key_id))
+        let privateKey = try Insecure.RSA.PrivateKey(pem: config.private_key)
+        let signers = JWTKeyCollection()
         
-        let jwt = try signers.sign(FirebaseAdminAuthPayload(
+        await signers.add(rsa: privateKey, digestAlgorithm: .sha256, kid: JWKIdentifier(string: config.private_key_id))
+        
+        let jwt = try await signers.sign(FirebaseAdminAuthPayload(
             scope: scopes,
             issuer: .init(stringLiteral: config.client_email),
             audience: .init(stringLiteral: config.token_uri))
