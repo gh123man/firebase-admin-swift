@@ -8,7 +8,7 @@
 import Foundation
 import Vapor
 
-public class MessagingClient {
+public actor MessagingClient: Sendable {
     let app: Application
     let api: ApiClient
     var config: Config?
