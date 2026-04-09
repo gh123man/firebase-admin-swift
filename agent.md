@@ -46,7 +46,7 @@ Typical startup:
 
 ```swift
 let serviceAccountKey: String = ...
-try await app.firebase.loadConfig(from: serviceAccountKey, authClockSkew: 30)
+try await app.firebase.loadConfig(from: serviceAccountKey, authClockSkew: .seconds(30))
 ```
 
 Typical usage:
@@ -105,3 +105,4 @@ Notes:
 - Put request and response models in the payload files instead of embedding anonymous `Codable` types in clients.
 - Add tracked tests in `Tests/FirebaseTests/`.
 - Update [README.md](/Users/brian/dev/FirebaseVapor/README.md) when public initialization or usage changes.
+- Prefer `Duration` for new public time-based APIs. This repo still accepts `TimeInterval` in some places for compatibility, but `Duration` is the better call-site type.

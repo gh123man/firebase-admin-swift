@@ -1,9 +1,25 @@
 import XCTest
 import JWTKit
 import AnyCodable
+import Vapor
 @testable import Firebase
 
 final class AuthPayloadsTests: XCTestCase {
+    private let configJSON = """
+{
+  "type": "service_account",
+  "project_id": "test-project",
+  "private_key_id": "test-key-id",
+  "private_key": "-----BEGIN PRIVATE KEY-----\\nTEST\\n-----END PRIVATE KEY-----\\n",
+  "client_email": "firebase-adminsdk@test-project.iam.gserviceaccount.com",
+  "client_id": "1234567890",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk%40test-project.iam.gserviceaccount.com"
+}
+"""
+
     private struct TestAlgorithm: JWTAlgorithm {
         let name = "test"
 
@@ -81,6 +97,14 @@ final class AuthPayloadsTests: XCTestCase {
                 try await payload.verify(using: TestAlgorithm())
             }
         }
+    }
+
+    func testFirebaseApiAcceptsDurationClockSkew() async throws {
+        let app = try await Application.make(.testing)
+
+        try await app.firebase.loadConfig(from: configJSON, authClockSkew: Duration.seconds(30))
+        await app.firebase.configureAuthValidation(clockSkew: Duration.seconds(45))
+        try await app.asyncShutdown()
     }
 }
 

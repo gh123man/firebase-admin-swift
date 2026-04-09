@@ -25,6 +25,10 @@ public actor AuthClient: Sendable {
     public func configureValidation(clockSkew: TimeInterval = .zero) {
         validationClockSkew = max(0, clockSkew)
     }
+
+    public func configureValidation(clockSkew: Duration) {
+        configureValidation(clockSkew: clockSkew.timeInterval)
+    }
     
     public func validate(idToken: String) async throws -> FirebaseJWTPayload {
         guard let config = await api.config else {

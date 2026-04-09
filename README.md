@@ -22,10 +22,10 @@ During app startup
 import Firebase
 
 let serviceAccountKey: String = // Load your serviceAccountKey.json file
-try await app.firebase.loadConfig(from: serviceAccountKey, authClockSkew: 30)
+try await app.firebase.loadConfig(from: serviceAccountKey, authClockSkew: .seconds(30))
 ```
 
-`authClockSkew` is in seconds and is applied symmetrically during ID-token validation, so small NTP drift will be tolerated for `iat`, `auth_time`, and `exp`.
+`authClockSkew` accepts either `Duration` or `TimeInterval` and is applied symmetrically during ID-token validation, so small NTP drift will be tolerated for `iat`, `auth_time`, and `exp`.
 
 In your app
 
