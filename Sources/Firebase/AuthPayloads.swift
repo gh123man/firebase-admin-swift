@@ -37,6 +37,10 @@ public struct FirebaseContext: Codable, Sendable {
 }
 
 public struct FirebaseJWTPayload: JWTPayload {
+    enum VerificationContext {
+        @TaskLocal
+        static var clockSkew: TimeInterval = .zero
+    }
     
     enum CodingKeys: String, CodingKey {
         case issuer = "iss"
@@ -69,26 +73,40 @@ public struct FirebaseJWTPayload: JWTPayload {
     public let isEmailVerified: Bool?
     public let phoneNumber: String?
     public let firebase: FirebaseContext
+
+    static func withVerificationClockSkew<T>(
+        _ clockSkew: TimeInterval,
+        operation: () async throws -> T
+    ) async rethrows -> T {
+        try await VerificationContext.$clockSkew.withValue(max(0, clockSkew)) {
+            try await operation()
+        }
+    }
     
     // https://firebase.google.com/docs/auth/admin/verify-id-tokens
     public func verify(using algorithm: some JWTKit.JWTAlgorithm) async throws {
+        let clockSkew = Self.VerificationContext.clockSkew
+        let now = Date()
+        let latestAcceptedIssueDate = now.addingTimeInterval(clockSkew)
+        let earliestAcceptedExpirationDate = now.addingTimeInterval(-clockSkew)
+
         guard subject.value != "" else {
             throw JWTError.claimVerificationFailure(failedClaim: SubjectClaim(value: subject.value), reason: "Subject claim cannot be empty.")
         }
         
-        guard issuedAt.value < Date() else {
+        guard issuedAt.value <= latestAcceptedIssueDate else {
             throw JWTError.claimVerificationFailure(failedClaim: IssuedAtClaim(value: issuedAt.value), reason: "Issued at claim must be in the past.")
         }
         
-        guard authTime < Date() else {
+        guard authTime <= latestAcceptedIssueDate else {
             throw JWTError.claimVerificationFailure(failedClaim: NotBeforeClaim(value: authTime), reason: "Auth time claim must be in the past.")
         }
         
-        guard expirationAt.value > Date() else {
+        guard expirationAt.value > earliestAcceptedExpirationDate else {
             throw JWTError.claimVerificationFailure(failedClaim: ExpirationClaim(value: expirationAt.value), reason: "Token expired at \(expirationAt.value)")
         }
         
-        try expirationAt.verifyNotExpired()
+        try expirationAt.verifyNotExpired(currentDate: earliestAcceptedExpirationDate)
     }
 }
 

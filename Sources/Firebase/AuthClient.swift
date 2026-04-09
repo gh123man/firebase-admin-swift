@@ -14,11 +14,20 @@ public actor AuthClient: Sendable {
     
     let app: Application
     let api: ApiClient
+    private var validationClockSkew: TimeInterval = .zero
     
     
     init(app: Application, api: ApiClient) {
         self.app = app
         self.api = api
+    }
+
+    public func configureValidation(clockSkew: TimeInterval = .zero) {
+        validationClockSkew = max(0, clockSkew)
+    }
+
+    public func configureValidation(clockSkew: Duration) {
+        configureValidation(clockSkew: clockSkew.timeInterval)
     }
     
     public func validate(idToken: String) async throws -> FirebaseJWTPayload {
@@ -65,7 +74,9 @@ public actor AuthClient: Sendable {
         let signers = JWTKeyCollection()
         try await signers.add(jwks: jwks)
         
-        return try await signers.verify(idToken, as: FirebaseJWTPayload.self)
+        return try await FirebaseJWTPayload.withVerificationClockSkew(validationClockSkew) {
+            try await signers.verify(idToken, as: FirebaseJWTPayload.self)
+        }
     }
     
     public func getUser(uid: String) async throws -> FirebaseUser {

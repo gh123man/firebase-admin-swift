@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 extension TimeInterval {
     static func seconds(_ val: Double) -> Self {
         return val
@@ -21,5 +22,12 @@ extension TimeInterval {
     
     static func days(_ val: Double) -> Self {
         return val * .hours(24)
+    }
+}
+
+extension Duration {
+    var timeInterval: TimeInterval {
+        let components = self.components
+        return Double(components.seconds) + (Double(components.attoseconds) / 1_000_000_000_000_000_000)
     }
 }

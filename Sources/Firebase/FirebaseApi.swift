@@ -25,13 +25,24 @@ public actor FirebaseApi: Sendable {
         self.messaging = MessagingClient(app: app, api: api)
     }
     
-    public func loadConfig(from json: String) async throws {
+    public func loadConfig(from json: String, authClockSkew: TimeInterval = .zero) async throws {
         config = try json.jsonDecoded()
         await api.setConfig(config)
+        await auth.configureValidation(clockSkew: authClockSkew)
+    }
+
+    public func loadConfig(from json: String, authClockSkew: Duration) async throws {
+        try await loadConfig(from: json, authClockSkew: authClockSkew.timeInterval)
+    }
+
+    public func configureAuthValidation(clockSkew: TimeInterval = .zero) async {
+        await auth.configureValidation(clockSkew: clockSkew)
+    }
+
+    public func configureAuthValidation(clockSkew: Duration) async {
+        await auth.configureValidation(clockSkew: clockSkew)
     }
     
 }
-
-
 
 
