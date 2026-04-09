@@ -16,17 +16,16 @@ Add the package dependency to your `Package.swift`
 ])
 ```
 
-In `configure.swift`
+During app startup
 
 ```swift
 import Firebase
 
-// Called before your application initializes.
-func configure(_ app: Application) throws {
-    let serviceAccountKey: String = // Load your serviceAccountKey.json file
-    try app.firebase.loadConfig(from: serviceAccountKey)
-}
+let serviceAccountKey: String = // Load your serviceAccountKey.json file
+try await app.firebase.loadConfig(from: serviceAccountKey, authClockSkew: 30)
 ```
+
+`authClockSkew` is in seconds and is applied symmetrically during ID-token validation, so small NTP drift will be tolerated for `iat`, `auth_time`, and `exp`.
 
 In your app
 
@@ -61,5 +60,3 @@ Only a few methods are implemented (see above), and several arguments/query para
 ## Notes
 
 - This library uses the `app.cache` to store tokens before they expire. 
-
-
