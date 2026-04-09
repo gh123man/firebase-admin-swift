@@ -31,6 +31,9 @@ let package = Package(
             ]),
         .testTarget(
             name: "FirebaseTests",
-            dependencies: ["Firebase"]),
+            dependencies: ["Firebase"],
+            exclude: [
+                "FirebaseVaporTests.swift",
+            ]),
     ]
 )

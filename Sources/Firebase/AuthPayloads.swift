@@ -90,8 +90,12 @@ public struct FirebaseJWTPayload: JWTPayload {
         let latestAcceptedIssueDate = now.addingTimeInterval(clockSkew)
         let earliestAcceptedExpirationDate = now.addingTimeInterval(-clockSkew)
 
-        guard subject.value != "" else {
+        guard !subject.value.isEmpty else {
             throw JWTError.claimVerificationFailure(failedClaim: SubjectClaim(value: subject.value), reason: "Subject claim cannot be empty.")
+        }
+
+        guard subject.value.count <= 128 else {
+            throw JWTError.claimVerificationFailure(failedClaim: SubjectClaim(value: subject.value), reason: "Subject claim must be 128 characters or fewer.")
         }
         
         guard issuedAt.value <= latestAcceptedIssueDate else {

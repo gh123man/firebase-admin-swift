@@ -39,19 +39,16 @@ public actor AuthClient: Sendable {
         do {
             result = try await verify(idToken: idToken)
         } catch {
-            // It's possible google has rotated the JWT keys, so if we get any kind of failure - let's try one more time without the cache.
+            guard Self.shouldRetryVerification(after: error) else {
+                throw error
+            }
+
+            // It's possible Google has rotated the JWT keys, so refresh the JWKS once
+            // for signature and key lookup failures before returning the error.
             result = try await verify(idToken: idToken, forceRefresh: true)
         }
         
-        guard result.audience.value.first == config.project_id else {
-            throw JWTError.generic(identifier: "aud", reason: "Audience must be equal to the firebase project id.")
-        }
-        
-        guard let url = URL(string: result.issuer.value),
-              let expectedUrl = URL(string: "https://securetoken.google.com/\(config.project_id)"),
-                url == expectedUrl else {
-            throw JWTError.generic(identifier: "iss", reason: "Claim must be issued by google and contain the project id")
-        }
+        try Self.validateStandardClaims(result, projectID: config.project_id)
         
         return result
     }
@@ -122,5 +119,38 @@ public actor AuthClient: Sendable {
         
         try await api.throwIfError(response: response)
         throw Abort(.internalServerError, reason: "Could not parse response")
+    }
+
+    static func validateStandardClaims(_ payload: FirebaseJWTPayload, projectID: String) throws {
+        guard payload.audience.value.contains(projectID) else {
+            throw JWTError.claimVerificationFailure(
+                failedClaim: payload.audience,
+                reason: "Audience must include the firebase project id."
+            )
+        }
+
+        guard payload.issuer.value == expectedIssuer(for: projectID) else {
+            throw JWTError.claimVerificationFailure(
+                failedClaim: payload.issuer,
+                reason: "Claim must be issued by Google and contain the project id."
+            )
+        }
+    }
+
+    static func expectedIssuer(for projectID: String) -> String {
+        "https://securetoken.google.com/\(projectID)"
+    }
+
+    static func shouldRetryVerification(after error: Error) -> Bool {
+        guard let jwtError = error as? JWTError else {
+            return false
+        }
+
+        switch jwtError.errorType {
+        case .unknownKID, .signatureVerificationFailed, .noKeyProvided:
+            return true
+        default:
+            return false
+        }
     }
 }
