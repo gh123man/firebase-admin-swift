@@ -89,6 +89,7 @@ Notes:
 
 - The tracked unit coverage currently lives in [Tests/FirebaseTests/AuthPayloadsTests.swift](/Users/brian/dev/FirebaseVapor/Tests/FirebaseTests/AuthPayloadsTests.swift).
 - The repo also has an ignored file name, `FirebaseVaporTests.swift`, in `.gitignore`. That path has historically been used for local integration experiments and should not be relied on for tracked regression coverage.
+- [Package.swift](/Users/brian/dev/FirebaseVapor/Package.swift) excludes `FirebaseVaporTests.swift` from the default test target so `swift test` stays deterministic and does not execute local secret-bearing integration code by accident.
 - `swift test` emits a third-party warning from `multipart-kit` about `Docs.docc`. That warning is upstream and not caused by this package.
 
 ## Conventions And Gotchas

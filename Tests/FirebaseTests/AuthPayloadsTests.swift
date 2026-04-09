@@ -99,6 +99,33 @@ final class AuthPayloadsTests: XCTestCase {
         }
     }
 
+    func testPayloadRejectsTooLongSubject() async throws {
+        let now = Date()
+        let payload = FirebaseJWTPayload(
+            issuer: .init(value: "https://securetoken.google.com/test-project"),
+            issuedAt: .init(value: now.addingTimeInterval(-60)),
+            expirationAt: .init(value: now.addingTimeInterval(60)),
+            audience: .init(value: ["test-project"]),
+            subject: .init(value: String(repeating: "a", count: 129)),
+            authTime: now.addingTimeInterval(-60),
+            userID: "user-123",
+            email: "user@example.com",
+            picture: nil,
+            name: nil,
+            isEmailVerified: true,
+            phoneNumber: nil,
+            firebase: FirebaseContext(
+                signInProvider: "password",
+                tenant: nil,
+                identities: [:]
+            )
+        )
+
+        await XCTAssertThrowsErrorAsync {
+            try await payload.verify(using: TestAlgorithm())
+        }
+    }
+
     func testFirebaseApiAcceptsDurationClockSkew() async throws {
         let app = try await Application.make(.testing)
 
